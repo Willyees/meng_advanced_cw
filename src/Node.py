@@ -11,7 +11,7 @@ class Node(object):
         successfulHash = False
         hash : str 
         while not successfulHash:
-            hash : str= block.computeHash()
+            hash = block.computeHash()
             if hash.startswith("0" * difficulty):
                 successfulHash = True
             else:
@@ -25,6 +25,8 @@ class Node(object):
     def mine(self):
         #get next block to mine from blockchain
         block = self.blockchain.provideNextBlock()
+        if block == None:
+            return None
         hash = self.findHash(self.blockchain.getDifficulty(), block)
         self.blockchain.addBlock(block, hash)
         return hash

@@ -4,9 +4,16 @@ import string
 
 
 class Transaction(object):
-    def __init__(self):
+    def __init__(self, sender, receiver, timestamp, amount):
+        self.sender = sender
+        self.receiver = receiver
+        self.timestamp = timestamp
+        self.amount = amount
         print("created a transaction")
-        pass
+    
+    def getJson(self):
+        return json.dumps(self.__dict__, sort_keys = True)
+
 class Block(object):
     def __init__(self, index : int, transactions, timestamp, previousHash):
         self.index = index #check. it might be from the index
@@ -17,9 +24,15 @@ class Block(object):
         #selfHash : str
 
     def computeHash(self):
-        print(self.__dict__)
-        blockJsonStr = json.dumps(self.__dict__, sort_keys= True)
+        blockJsonStr = json.dumps(self.__dict__, default= encodeDef, sort_keys= True)
         return sha256(blockJsonStr.encode()).hexdigest()
 
     def __str__(self):
         return str(self.__dict__)
+
+def encodeDef(o):
+    if isinstance(o, Transaction):
+        return o.__dict__
+    else:
+        typeName = o.__class__.__name__
+        raise TypeError(f"Object of type '{type_name}' is not JSON serializable!")
