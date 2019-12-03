@@ -1,8 +1,9 @@
 from Block import *
+from Blockchain import *
 
 class Node(object):
     nonce = 0
-    def __init__(self, blockchain):
+    def __init__(self, blockchain : Blockchain):
         self.blockchain = blockchain
         pass
 
@@ -20,4 +21,12 @@ class Node(object):
     def getNextBlock(self):
         #get a block with transactions
         pass
+
+    def mine(self):
+        #get next block to mine from blockchain
+        block = self.blockchain.provideNextBlock()
+        hash = self.findHash(self.blockchain.getDifficulty(), block)
+        self.blockchain.addBlock(block, hash)
+        return hash
+
 

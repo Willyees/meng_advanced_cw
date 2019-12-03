@@ -5,9 +5,8 @@ from Node import *
 def __main__():
     chain = Blockchain()
     node = Node(chain)
-    block1 = chain.last_block
-    successhash = node.findHash(1, block1)
-    print(successhash)
+    successhash = node.mine()
+    print(chain.provideNextBlock())
 
 __main__()
 
