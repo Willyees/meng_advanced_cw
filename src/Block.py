@@ -14,6 +14,12 @@ class Transaction(object):
     def getJson(self):
         return json.dumps(self.__dict__, sort_keys = True)
 
+    def decodeJson(dct):
+        return Transaction(dct["sender"], dct["receiver"], dct["timestamp"], dct["amount"])
+    
+    def __str__(self):
+        return str(self.__dict__)
+
 class Block(object):
     def __init__(self, index : int, transactions, timestamp, previousHash):
         self.index = index #check. it might be from the index
