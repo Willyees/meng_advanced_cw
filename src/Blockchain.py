@@ -5,15 +5,23 @@ import itertools
 
 
 class Blockchain(object):
-    def __init__(self):
+    def __init__(self, difficulty=2, lastBlockIndex=0, lastHash=""):
         self.chain = []
-        self.difficulty = 2
-        self.unconfirmed_transactions : list = list() #Transactions. will be stored as JSON str in the Block
+        self.difficulty = difficulty
+        self.unconfirmed_transactions : list = list()
+        self.lastBlockIndex = lastBlockIndex
+        self.lastHash = lastHash
+        #start the chain
         self.createGenesisBlock()
         self.lastBlockIndex = self.lastBlock.index
-        self.lastHash = "0"
+        self.lastBlockIndex = self.lastBlock.index
 
-
+            
+    @classmethod
+    def fromJson(cls, jsonDict):
+        json.loads(jsonDict)
+        return cls()
+    
     def getDifficulty(self):
         return self.difficulty
 
@@ -62,7 +70,10 @@ class Blockchain(object):
         #listTransStr = json.dumps([self.unconfirmed_transactions[2].__dict__])
         block = Block(self.lastBlockIndex + 1, transactionsToBlock, time.time(), self.lastHash)
         return block
-
+    
+    #make sure that the blockchain is not tampered
+    #def verifyWholeChain
+    
     def __str__(self):
         s = ""
         for block in self.chain:

@@ -39,6 +39,8 @@ class Block(object):
 def encodeDef(o):
     if isinstance(o, Transaction):
         return o.__dict__
+    if isinstance(o, Block):
+        return o.__dict__
     else:
         typeName = o.__class__.__name__
         raise TypeError(f"Object of type '{type_name}' is not JSON serializable!")

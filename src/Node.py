@@ -26,6 +26,7 @@ class Node(object):
         #get next block to mine from blockchain
         block = self.blockchain.provideNextBlock()
         if block == None:
+            print("No transactions available")
             return None
         hash = self.findHash(self.blockchain.getDifficulty(), block)
         self.blockchain.addBlock(block, hash)

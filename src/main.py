@@ -11,20 +11,13 @@ def createTransactionsIntial(nTransactions):
     return transactions
 
 def __main__():
-    t = Transaction(0, 10, time.time(), 20)
-    tJson = """{"sender": 0, "receiver": 10, "timestamp": 1575457940.1777258, "amount": 20}"""
-    t1Dict = json.loads(tJson)
-    t1 = Transaction.decodeJson(t1Dict)
-    print(type(t1))
-    print(json.dumps(t, default= encodeDef))
-
     chain = Blockchain()
     node = Node(chain)
-
+    chain.unconfirmed_transactions.append(createTransactionsIntial(6))
     for i in range(0, 3):   
         successhash = node.mine()
-    t = createTransactionsIntial(1)
-    print(str(json.dumps(t[0].__dict__, sort_keys=True)))
+    print(chain.__dict__)
+    print(type(json.dumps(chain.__dict__, default=encodeDef)))
     #print(chain)
 __main__()
 
