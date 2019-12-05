@@ -13,7 +13,8 @@ app = Flask(__name__)
 chain = Blockchain()
 peers = set()
 transactionsIntial = createTransactionsIntial(6)
-chain.unconfirmed_transactions.append(transactionsIntial)
+for t in transactionsIntial:
+    chain.unconfirmed_transactions.append(t)
 
 # @app.route('/new-ttransaction')
 # def new_transaction_parameters():
@@ -84,8 +85,10 @@ def registerNewNode():
     if not nodesJson:
         return "Invalid data", 400
     peers.add(nodesJson)
-    chain = getChain()
-    return chain, 200 #plus return the chain to the newly added node #return getChain()
+    global chain 
+    chainJson = json.dumps(chain.__dict__, sort_keys=True, default=encodeDef) 
+    print(chainJson)
+    return chainJson, 200 #plus return the chain to the newly added node #return getChain()
 
 
 #other nodes that want to register with main blockchain node
@@ -103,7 +106,12 @@ def registerNodeWith():
     if response.status_code == 200:
         chainHostJson = response.json()#['chain'] #not only the chain in needed, aslo difficulty etc
         chainHostStr : str = str(chainHostJson)
+        print(chainHostStr)
         blockchain = Blockchain.fromJson(chainHostStr.replace("'", "\""))
+        global chain
+        print(blockchain)
+        chain = blockchain
+        print(chain)
         #peers.update(response.json()['peers']) #dont need to update the nodes because this function is only called from nodes and not the main blockchain
         return "Success", 200
     else:

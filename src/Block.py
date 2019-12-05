@@ -11,23 +11,33 @@ class Transaction(object):
         self.amount = amount
         print("created a transaction")
     
+    @classmethod
+    def decodeJson(cls, dct):
+        return cls(dct["sender"], dct["receiver"], dct["timestamp"], dct["amount"])
+
     def getJson(self):
         return json.dumps(self.__dict__, sort_keys = True)
 
-    def decodeJson(dct):
-        return Transaction(dct["sender"], dct["receiver"], dct["timestamp"], dct["amount"])
     
     def __str__(self):
         return str(self.__dict__)
 
 class Block(object):
-    def __init__(self, index : int, transactions, timestamp, previousHash):
+    def __init__(self, index : int, transactions, timestamp, previousHash, nonce=0):
         self.index = index #check. it might be from the index
-        self.transactions = transactions
+        self.transactions : list = transactions
         self.timestamp = timestamp
         self.previousHash = previousHash
-        self.nonce = 0
+        self.nonce = nonce
         #selfHash : str
+
+    @classmethod
+    def decodeJson(cls, dct):
+        transactions = list()
+        transactionsdir : dict = dct["transactions"]
+        for t in transactionsdir:
+            transactions.append(Transaction.decodeJson(transactionsdir))
+        return cls(dct["index"], transactions, dct["timestamp"], dct["previousHash"])      
 
     def computeHash(self):
         blockJsonStr = json.dumps(self.__dict__, default= encodeDef, sort_keys= True)

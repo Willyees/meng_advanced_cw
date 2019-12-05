@@ -5,22 +5,33 @@ import itertools
 
 
 class Blockchain(object):
-    def __init__(self, difficulty=2, lastBlockIndex=0, lastHash=""):
+    def __init__(self, difficulty=2, lastBlockIndex=0, lastHash="", genesis=True):
         self.chain = []
         self.difficulty = difficulty
         self.unconfirmed_transactions : list = list()
         self.lastBlockIndex = lastBlockIndex
         self.lastHash = lastHash
         #start the chain
-        self.createGenesisBlock()
-        self.lastBlockIndex = self.lastBlock.index
-        self.lastBlockIndex = self.lastBlock.index
+        if genesis:
+            self.createGenesisBlock()
+            self.lastBlockIndex = self.lastBlock.index
 
             
     @classmethod
     def fromJson(cls, jsonDict):
-        json.loads(jsonDict)
-        return cls()
+        c = json.loads(jsonDict) #chain dictionary
+        chain : list = list()
+        for block in c["chain"]:
+            chain.append(Block.decodeJson(block))
+        
+        transactions : list = list()
+        for t in c["unconfirmed_transactions"]:
+            transactions.append(Transaction.decodeJson(t))
+
+        blockchain : Blockchain= cls(difficulty=c["difficulty"], lastBlockIndex=c["lastBlockIndex"],lastHash=c["lastHash"], genesis=False) #dont need to create genesis block
+        blockchain.chain = chain
+        blockchain.unconfirmed_transactions = transactions
+        return blockchain
     
     def getDifficulty(self):
         return self.difficulty
