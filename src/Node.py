@@ -16,6 +16,7 @@ class Node(object):
                 successfulHash = True
             else:
                 block.nonce += 1
+        print(block)
         return hash
 
     def getNextBlock(self):

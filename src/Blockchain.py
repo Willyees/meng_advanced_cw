@@ -57,7 +57,7 @@ class Blockchain(object):
         if not self.verifyHashBlock(block, hash):
             return False
         self.chain.append(block)
-        self.removeTransactions(2) #hardcoded
+        self.removeTransactions(1) #hardcoded
         #block.selfHash = hash
         self.lastBlockIndex += 1
         self.lastHash = hash
@@ -72,12 +72,15 @@ class Blockchain(object):
     def verifyHashBlock(self, block : Block, hash):
         hashCalculated = block.computeHash()
         return hash.startswith("0" * self.difficulty) and hashCalculated == hash
-   
+    
+    def getLastBlock(self):
+        return self.chain[-1]
+
     def provideNextBlock(self):
         if not self.unconfirmed_transactions:
             return None
         #passing 2 transactions. no tests at the moment
-        transactionsToBlock = self.unconfirmed_transactions[0:2]
+        transactionsToBlock = self.unconfirmed_transactions[0:1]
         #listTransStr = json.dumps([self.unconfirmed_transactions[2].__dict__])
         block = Block(self.lastBlockIndex + 1, transactionsToBlock, time.time(), self.lastHash)
         return block

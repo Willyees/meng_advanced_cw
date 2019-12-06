@@ -9,7 +9,6 @@ class Transaction(object):
         self.receiver = receiver
         self.timestamp = timestamp
         self.amount = amount
-        print("created a transaction")
     
     @classmethod
     def decodeJson(cls, dct):
@@ -35,9 +34,11 @@ class Block(object):
     def decodeJson(cls, dct):
         transactions = list()
         transactionsdir : dict = dct["transactions"]
+        if len(transactionsdir) == 0:
+            pass
         for t in transactionsdir:
-            transactions.append(Transaction.decodeJson(transactionsdir))
-        return cls(dct["index"], transactions, dct["timestamp"], dct["previousHash"])      
+            transactions.append(Transaction.decodeJson(t))
+        return cls(dct["index"], transactions, dct["timestamp"], dct["previousHash"], dct["nonce"])      
 
     def computeHash(self):
         blockJsonStr = json.dumps(self.__dict__, default= encodeDef, sort_keys= True)

@@ -13,12 +13,14 @@ def createTransactionsIntial(nTransactions):
 def __main__():
     chain = Blockchain()
     node = Node(chain)
-    chain.unconfirmed_transactions.append(createTransactionsIntial(6))
-    for i in range(0, 3):   
-        successhash = node.mine()
-    print(chain.__dict__)
-    print(type(json.dumps(chain.__dict__, default=encodeDef)))
-    #print(chain)
-__main__()
+    chain.unconfirmed_transactions = createTransactionsIntial(6)
+    tJson = json.dumps(chain.unconfirmed_transactions, default=encodeDef)
+    tJsonl = json.loads(tJson)
+    transactions : list = list()
+    for t in tJsonl:
+        transactions.append(Transaction.decodeJson(t))
+    pass
+
+
 
 
