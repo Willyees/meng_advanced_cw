@@ -13,6 +13,8 @@ app = Flask(__name__)
 chain = Blockchain()
 peers = set()
 transactionsIntial = createTransactionsIntial(6)
+transactionsNodeAddress = ""
+
 for t in transactionsIntial:
     chain.unconfirmed_transactions.append(t)
 
@@ -29,19 +31,22 @@ for t in transactionsIntial:
 
 @app.route('/new-transaction', methods = ['POST'])
 def new_transaction():
-    tx_data = request.get_json()#using transaction with json format. Have to transform in Transaction obj
+    tx_data : Requests = request.get_json()#using transaction with json format. Have to transform in Transaction obj
     required_fields = ["sender", "receiver", "amount"]
-
     for field in required_fields:
         if tx_data.get(field) == None:
             return "Invalid transaction data", 404
 
+    if transactionsNodeAddress != "": #means that this node is connected to the network and will not be storing transactions by itself
+    #send the info to the main node storing transactions (pool)
+        requests.post(transactionsNodeAddress + "/new-transaction", data=json.dumps(tx_data), headers=request.headers)
+        return "This node is not the designated node to be a transaction pool"
+
     tx_data["timestamp"] = time.time()
-    
     transaction = Transaction.decodeJson(tx_data)
     chain.addNewTransactions([transaction])
 
-    return "success" + str(transaction), 201
+    return "success" + str(transaction), 200
 
 @app.route('/chain', methods=['GET'])
 def getChain():
@@ -87,20 +92,19 @@ def registerNewNode():
     peers.add(nodesJson)
     global chain 
     chainJson = json.dumps(chain.__dict__, sort_keys=True, default=encodeDef) 
-    print(chainJson)
     return chainJson, 200 #plus return the chain to the newly added node #return getChain()
 
 
 #other nodes that want to register with main blockchain node
 @app.route('/register-with', methods=['POST'])
 def registerNodeWith():
-    hostAddress = request.get_json()["address"]
-    if not hostAddress:
+    clientAddress = request.get_json()["address"]
+    if not clientAddress:
         return "Empty host address", 400
     #request to register with the host
     data = {"address" : request.host_url}
     header = {'Content-Type': "application/json"}
-    response : Response = requests.post(hostAddress + "/add-node", data=json.dumps(data), headers=header)
+    response : Response = requests.post(clientAddress + "/add-node", data=json.dumps(data), headers=header)
 
     #get the chain from the reponse in case it was successful
     if response.status_code == 200:
@@ -109,9 +113,10 @@ def registerNodeWith():
         print(chainHostStr)
         blockchain = Blockchain.fromJson(chainHostStr.replace("'", "\""))
         global chain
-        print(blockchain)
         chain = blockchain
-        print(chain)
+        global transactionsNodeAddress
+        transactionsNodeAddress = clientAddress
+        print("**ASD" + clientAddress)
         #peers.update(response.json()['peers']) #dont need to update the nodes because this function is only called from nodes and not the main blockchain
         return "Success", 200
     else:
@@ -123,12 +128,13 @@ def provideNewBlock():
     for peer in peers:
         url = "http://{}/add-block".format(peer)
         requests.post(url, data=json.dumps(block.__dict__, sort_keys=True))
-# @app.route('/mine', methods=['GET'])
-# def mine_unconfirmed_transactions():
-#     result = blockchain.mine()
-#     if not result:
-#         return "No transactions to mine"
-#     return "Block #{} is mined.".format(result)
+
+@app.route('/mine', methods=['GET'])
+def mine_unconfirmed_transactions():
+    result = chain.mine()
+    if not result:
+        return "No transactions to mine"
+    return "Block #{} is mined.".format(result)
 
 #https://scotch.io/bar-talk/processing-incoming-request-data-in-flask
 #mention to postman and how to use it
