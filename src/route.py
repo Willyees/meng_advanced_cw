@@ -57,6 +57,13 @@ def getChain():
     return json.dumps({"length" : len(node.blockchain.chain), 
         "chain" : chainData, "peers" : list(peers)}, default=encodeDef)
 
+@app.route('/blockchain', methods=['GET']) #passing the whole blockchain. it is needed also the lastHash, lastIndex, ~difficulty
+def getBlockchain():
+    dct = node.blockchain.__dict__.copy()
+    dct["length"] = len(node.blockchain.chain)
+    return json.dumps(dct, default=encodeDef)
+    
+
 @app.route('/unconfirmed-transactions', methods=['GET'])
 def showUnconfTransactions():
     p = json.dumps(node.blockchain.unconfirmed_transactions, default=encodeDef)
@@ -64,7 +71,23 @@ def showUnconfTransactions():
 
 
 #todo decide which chain to keep in case longer valid chain is found
-#def consensus():
+def consensus():
+    longestLength = len(node.blockchain.chain)
+    longestChain = None
+    for peer in peers:
+        response = requests.get("{}/blockchain".format(peer))
+        length = response.json()['length']
+        if(length > longestLength):
+            b = str(response.json()).replace("'", "\"")
+            blockchain = Blockchain.fromJson(b)
+            if Blockchain.verifyValidity(blockchain):
+                longestChain = blockchain.chain
+    if longestChain:
+        node.blockchain = Blockchain.fromJson(str(response.json()).replace("'", "\""))
+        return True#
+    return False#
+
+        
 
 @app.route('/add-block', methods=['POST'])
 def addBlock():
@@ -142,11 +165,13 @@ def propagateNewBlock(hash):
         dct["hash"] = hash
         requests.post(url, data=json.dumps(dct, sort_keys=True, default=encodeDef), headers=headers)
 
-# @app.route('/while')
-# def longwait():
-#     init = time.time()
-#     while time.time() < (init + 20.0):
-#         pass
+#debug
+@app.route('/while')
+def longwait():
+    init = time.time()
+    while time.time() < (init + 20.0):
+        pass
+    return "20 secs have passed"
 
 @app.route('/mine', methods=['GET'])
 def mine_unconfirmed_transactions():
@@ -154,7 +179,7 @@ def mine_unconfirmed_transactions():
     hash = node.mine()
     if not hash:
         return "No transactions to mine"
-    propagateNewBlock(hash)
+    #propagateNewBlock(hash)
     return "Block #{} is mined.".format(hash)
     
 
@@ -181,5 +206,5 @@ def show_peers_connected():
 
 @app.route('/test')
 def test():
-    return setUnconfTransactions()
+    return consensus()
 app.run(port=8000)

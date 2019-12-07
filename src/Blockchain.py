@@ -5,7 +5,7 @@ import itertools
 
 
 class Blockchain(object):
-    def __init__(self, difficulty=2, lastBlockIndex=0, lastHash="", genesis=True):
+    def __init__(self, difficulty=3, lastBlockIndex=0, lastHash="", genesis=True):
         self.chain = []
         self.difficulty = difficulty
         self.unconfirmed_transactions : list = list()
@@ -15,6 +15,7 @@ class Blockchain(object):
         if genesis:
             self.createGenesisBlock()
             self.lastBlockIndex = self.lastBlock.index
+            self.lastHash = self.lastBlock.computeHash()
 
             
     @classmethod
@@ -37,7 +38,19 @@ class Blockchain(object):
         return self.difficulty
 
     def createGenesisBlock(self):
-        genesisBlock = Block(0, [], time.time(), "0")
+        genesisBlock = Block(0, [], time.time(), "0" * self.difficulty)
+        def findHash(difficulty, block : Block)  -> str:
+            successfulHash = False
+            hash : str 
+            while not successfulHash:
+                hash = block.computeHash()
+                if hash.startswith("0" * difficulty):
+                    successfulHash = True
+                else:
+                    block.nonce += 1
+            print(block)
+            return hash
+        findHash(self.difficulty, genesisBlock)
         self.chain.append(genesisBlock)
 
     def addNewTransactions(self, transactions):
@@ -54,7 +67,7 @@ class Blockchain(object):
         if previousHash != block.previousHash:
             return False
         #verify hash was correctly calculated
-        if not self.verifyHashBlock(block, hash):
+        if not Blockchain.verifyHashBlock(block, hash, self.difficulty):
             return False
         self.chain.append(block)
         self.removeTransactions(1) #hardcoded
@@ -68,11 +81,22 @@ class Blockchain(object):
 
     def setDifficulty(self, difficulty):
         self.difficulty = difficulty 
-
-    def verifyHashBlock(self, block : Block, hash):
+    @classmethod
+    def verifyHashBlock(cls, block : Block, hash, difficulty):
         hashCalculated = block.computeHash()
-        return hash.startswith("0" * self.difficulty) and hashCalculated == hash
+        return hash.startswith("0" * difficulty) and hashCalculated == hash
     
+    @classmethod
+    def verifyValidity(cls, blockchain):
+        previousHash = "0" * blockchain.difficulty
+        for block in blockchain.chain:
+            if previousHash != block.previousHash:
+                return False
+            previousHash = block.computeHash()
+            if not cls.verifyHashBlock(block, previousHash, blockchain.difficulty):
+                return False
+        return True
+
     def getLastBlock(self):
         return self.chain[-1]
 
@@ -85,6 +109,9 @@ class Blockchain(object):
         block = Block(self.lastBlockIndex + 1, transactionsToBlock, time.time(), self.lastHash)
         return block
     
+   
+
+
     #make sure that the blockchain is not tampered
     #def verifyWholeChain
     
