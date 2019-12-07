@@ -179,7 +179,9 @@ def mine_unconfirmed_transactions():
     hash = node.mine()
     if not hash:
         return "No transactions to mine"
-    #propagateNewBlock(hash)
+    propagateNewBlock(hash)
+    #check first that no one has a longer chain
+    consensus() #might be moved in a different position
     return "Block #{} is mined.".format(hash)
     
 
