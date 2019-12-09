@@ -13,7 +13,7 @@ from main import createTransactionsIntial
 app = Flask(__name__)
 node = Node(Blockchain())
 peers = set()
-transactionsIntial = createTransactionsIntial(6)
+transactionsIntial = createTransactionsIntial(15)
 transactionsNodeAddress = ""
 
 for t in transactionsIntial:
@@ -175,6 +175,7 @@ def longwait():
 
 @app.route('/mine', methods=['GET'])
 def mine_unconfirmed_transactions():
+    longwait()
     setUnconfTransactions()
     hash = node.mine()
     if not hash:
@@ -204,7 +205,7 @@ def setUnconfTransactions():
 #debug show the peers connected
 @app.route('/peers', methods=['GET'])
 def show_peers_connected():
-    return str(peers)
+    return json.dumps(list(peers))
 
 @app.route('/test')
 def test():
