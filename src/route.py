@@ -175,7 +175,6 @@ def longwait():
 
 @app.route('/mine', methods=['GET'])
 def mine_unconfirmed_transactions():
-    longwait()
     setUnconfTransactions()
     hash = node.mine()
     if not hash:

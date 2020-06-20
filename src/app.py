@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template
 import requests
 import json
-import grequests
+#import grequests
 
 CONNECTED_NODE_ADDRESS = "http://127.0.0.1:8000"
 peers = set({'http://127.0.0.1:8000'})
