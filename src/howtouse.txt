@@ -1,0 +1,44 @@
+The application is composed by 
+single node code
+interface to add transactions and start mining process
+
+flask framework is needed to be able to create nodes locally
+At the moment is running only locally, but it can be set in a server with a few modifications
+
+to create a node:
+#first node
+cmd
+set FLASK_APP=route.py
+flask run --port 8000
+
+#second node
+cmd
+set FLASK_APP=route.py
+flask run --port 8001
+
+127.0.0.1:8000
+127.0.0.1:8001
+are the two url addresses of the node created. can use them singolarly or can link them sending a JSON POST request using a tool like Postman or curl:
+to hook 8001 with 8000, having 8000 as transactions pool holder:
+json post request to http://127.0.0.1:8001/register-with
+{"address": "http://127.0.0.1:8000"}
+
+available routes:
+/add-transactions
+/mine
+/chain
+
+
+to run the interface to easily add transactions to the nodes without using postman
+cmd
+set FLASK_APP=app.py
+flask run --port 5000
+
+interface is harcoded linked to the 8000 port node being the transaction holder. Not ideal but it can be modified
+available routes:
+/
+/mine
+
+to set off all the network to mine, use the route in the interface (the network need to be alredy set up with the links using /register-with node route)
+
+It is confusing, I know
